@@ -24,6 +24,7 @@ def b():
 	
 	# static markers
 	# A* navigation
+	# stitch viewpoints to derive position
 	
 	# 2 seperate problems:
 		# agent enters same map from another site and build local map and finds equivalence
@@ -98,13 +99,13 @@ def b():
 			if (hmap[xcell][ycell][2] == 1 or hmap[xcell+1][ycell][2] == 1):
 				hmap[xcell][ycell][3+5] = 1
 	
-	markers = (2,2)
+	markers = (5,5)
 	
 	# rotation of global map
 	
 	xrotc = hmap[int(xcell/2)][int(ycell/2)][0]
 	yrotc = hmap[int(xcell/2)][int(ycell/2)][1]
-	arot = 0#-math.pi/10	#18 deg
+	arot = -math.pi/10	#18 deg
 	
 	for ycell in range (0,ymax):
 		for xcell in range (0,xmax):
@@ -144,6 +145,9 @@ def b():
 					s1.setOutline("blue")
 					
 				s1.draw(win)
+				
+	pm = Point(hmap[markers[0]][markers[1]][0],hmap[markers[0]][markers[1]][1])
+	pm.draw(win)
 					
 	win.getMouse() # pause for click in window
 	win.close()
