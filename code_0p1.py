@@ -13,9 +13,9 @@ def a():
 		
 def b():
 	
-	r = 3;
-	ymax = 90;
-	xmax = 60;
+	r = 20;
+	ymax = 15;
+	xmax = 12;
 	
 	edges = [1,0,0,0,0,0]
 	pose = [0+2*r,0+2*r,0]

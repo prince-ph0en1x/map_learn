@@ -12,8 +12,9 @@ def a():
 def b():
 	
 	r = 30;
-	ymax = 5;
-	xmax = 5;
+	ymax = 3;
+	xmax = 2;
+	agtori = 30*2*math.pi/360;
 	
 	edges = [1,0,0,0,0,0]
 	pose = [0+2*r,0+2*r,0]
@@ -25,8 +26,8 @@ def b():
 	for ycell in range (0,ymax):
 		for xcell in range (0,xmax):
 			for ang in range (0,6):
-				v1 = Point(pose[0]+3*r*xcell+r*math.cos((math.pi/3)*ang),		pose[1]+math.sqrt(3)*r*ycell-r*math.sin((math.pi/3)*ang))
-				v2 = Point(pose[0]+3*r*xcell+r*math.cos((math.pi/3)*(ang+1)),	pose[1]+math.sqrt(3)*r*ycell-r*math.sin((math.pi/3)*(ang+1)))
+				v1 = Point(pose[0]+3*r*xcell+r*math.cos((math.pi/3+agtori)*ang),		pose[1]+math.sqrt(3)*r*ycell-r*math.sin((math.pi/3+agtori)*ang))
+				v2 = Point(pose[0]+3*r*xcell+r*math.cos((math.pi/3+agtori)*(ang+1)),	pose[1]+math.sqrt(3)*r*ycell-r*math.sin((math.pi/3+agtori)*(ang+1)))
 				s1 = Line(v1,v2)
 				if (random.random() > 0.5):
 					s1.setOutline("red")
