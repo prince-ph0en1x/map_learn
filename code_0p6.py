@@ -22,11 +22,19 @@ def b():
 	# gap between hex
 	# rotate hex
 	
+	# static markers
+	# A* navigation
+	
+	# 2 seperate problems:
+		# agent enters same map from another site and build local map and finds equivalence
+		# global agent proves equivalence for affine transformations of a map
+
+	
 	xwin = 600
 	ywin = 600
 	win = GraphWin("Print Map", xwin, ywin)
-	gap = 0#6		# gap between hex boundaries
-	r = 8#20		# centre to vertex distance of hex
+	gap = 6	#0#6		# gap between hex boundaries
+	r = 20	#8#20		# centre to vertex distance of hex
 	
 	jpgfile = Image.open("world001.jpg")
 	rgbfile = jpgfile.convert('RGB')
@@ -39,20 +47,15 @@ def b():
 	xmax = int(math.ceil((xwin-2*r)/(1.5*r+gap*math.cos(math.pi/6))))
 	agtori = 0*2*math.pi/360
 	
-	edges = [1,0,0,0,0,0]
-	pose = [0+r,0+r,0]
-	hexcell = [pose,edges]
-	print hexcell
-	
 	hmap = [[[0 for e in range(0,9)] for y in range(0,ymax)] for x in range(0,xmax)]
 	for ycell in range (ymax):
 		for xcell in range (xmax):
 			if (xcell % 2 == 0):
-				xc = pose[0]+(1.5*r+gap*math.cos(math.pi/6))*xcell
-				yc = pose[1]+(math.sqrt(3)*r+gap)*ycell
+				xc = r+(1.5*r+gap*math.cos(math.pi/6))*xcell
+				yc = r+(math.sqrt(3)*r+gap)*ycell
 			else:
-				xc = pose[0]+(1.5*r+gap*math.cos(math.pi/6))*xcell
-				yc = pose[1]+(math.sqrt(3)*r+gap)*ycell+(0.5*math.sqrt(3)*r+0.5*gap)
+				xc = r+(1.5*r+gap*math.cos(math.pi/6))*xcell
+				yc = r+(math.sqrt(3)*r+gap)*ycell+(0.5*math.sqrt(3)*r+0.5*gap)
 			
 			c1, c2, c3 = rgbfile.getpixel((int(xc/xwin*jpgfile.size[0]),int(yc/ywin*jpgfile.size[1])))
 			hmap[xcell][ycell][0] = xc
@@ -62,6 +65,8 @@ def b():
 			else:
 				hmap[xcell][ycell][2] = 0
 
+	# IMPROVE: Optimize multiple loops below
+	
 	# dirn 0
 	for ycell in range (1,ymax):
 		for xcell in range (0,xmax-1):
@@ -93,10 +98,13 @@ def b():
 			if (hmap[xcell][ycell][2] == 1 or hmap[xcell+1][ycell][2] == 1):
 				hmap[xcell][ycell][3+5] = 1
 	
+	markers = (2,2)
+	
+	# rotation of global map
+	
 	xrotc = hmap[int(xcell/2)][int(ycell/2)][0]
 	yrotc = hmap[int(xcell/2)][int(ycell/2)][1]
-	
-	arot = math.pi/2	#18 deg
+	arot = 0#-math.pi/10	#18 deg
 	
 	for ycell in range (0,ymax):
 		for xcell in range (0,xmax):
@@ -109,6 +117,7 @@ def b():
 			hmap[xcell][ycell][0] = xnew + xrotc;
 			hmap[xcell][ycell][1] = ynew + yrotc;
   	
+	# draw map
 													
 	for ycell in range (0,ymax):
 		for xcell in range (0,xmax):
@@ -117,9 +126,9 @@ def b():
 				yc = hmap[xcell][ycell][1]
 				p1 = Point(xc,yc)
 				if (hmap[xcell][ycell][2] == 1):
-					p1.setOutline("blue")
+					p1.setOutline("yellow")
 				else:
-					p1.setOutline("red")
+					p1.setOutline("cyan")
 				p1.draw(win)
 				
 				a1 = (math.pi/3+agtori)*ang
