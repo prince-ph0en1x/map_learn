@@ -7,6 +7,7 @@ from graphics import *
 import math
 import random
 from PIL import Image
+import re
 
 sz = 600
 
@@ -100,23 +101,22 @@ def turnMap(arot):		# rotation of global map
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 '''
 	
-def hexprob():
+def hexprob(d,fname):
+	
+	# d = vertex to vertex distance of hex
 	
 	# take world002_0.png and generate hex probability map
 	
 	win = GraphWin("Print Map", sz, sz)
 	
 	gap = 0	# gap between hex boundaries
-	d = 20	# vertex to vertex distance of hex
 	
-	imgfile = Image.open("images/world002_90.png")
+	imgfile = Image.open("images/world002_"+str(fname)+".png")
 	rgbfile = imgfile.convert('RGB')
 	
+	file = open("world002_"+str(fname)+".txt","w")
+	
 	rad = d/2 	#	d/(2*math.cos(30*2*math.pi/360))
-	
-	c1, c2, c3 = rgbfile.getpixel((300,300))
-	print(c1,c2,c3)
-	
 	xmax =  int(math.ceil(imgfile.size[0]/d))+1
 	ymax = int(math.ceil(imgfile.size[1]/(d*math.sqrt(3)/2)))+1
 	print(math.sqrt(3)/2)
@@ -124,7 +124,6 @@ def hexprob():
 		for xs in range (-xmax,xmax):
 			xc = (xs + float(ys)/2)*d
 			yc = (ys*math.sqrt(3)/2)*d
-			#print(xs,ys)
 			
 			if (xc >= 0 and xc <= sz and yc >= 0 and yc <= sz): 
 				
@@ -137,17 +136,18 @@ def hexprob():
 							c1, c2, c3 = rgbfile.getpixel((xpix,ypix))
 							if (c1 == 255):
 								pblu = pblu + 1
-				
+				prob = float(pblu)/ptot
+				file.write(str(xs)+","+str(ys)+","+str(prob)+"\n")
+				#print(xs,ys,prob)
 				cc = Circle(Point(xc,yc), rad)
-				cc.setOutline(color_rgb(int(float(pblu)/ptot*255),int(float(pblu)/ptot*255),255))
-				cc.setFill(color_rgb(int(float(pblu)/ptot*255),int(float(pblu)/ptot*255),255))
+				cc.setOutline(color_rgb(int(prob*255),int(prob*255),255))
+				cc.setFill(color_rgb(int(prob*255),int(prob*255),255))
 				cc.draw(win)		
-				
-	print(imgfile.size[0],xmax,ymax)
 	
+	file.close()			
 	win.postscript(file = "temp.eps", pageheight = sz-1, pagewidth = sz-1)
 	epsimg = Image.open("temp.eps")
-	epsimg.save("images/test6.png","png")
+	epsimg.save("images/world002_"+str(fname)+"h.png","png")
 	win.getMouse() # pause for click in window
 	win.close()
 	return
@@ -157,6 +157,50 @@ def hexprob():
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 '''	
 	
+def ssgScore(fname):
+	hxvl1 = []
+	file = open("world002_0.txt","r")
+	lno = 0
+	for line in file:
+		hxvl1.append([])
+		hxvl1[lno].extend(list(map(float,re.findall('[0-9|\'.\']+', line))))	# Lambda expression on Regex
+		lno = lno + 1
+	
+	hxvl2 = []
+	file = open("world002_"+str(fname)+".txt","r")
+	lno = 0
+	for line in file:
+		hxvl2.append([])
+		hxvl2[lno].extend(list(map(float,re.findall('[0-9|\'.\']+', line))))	# Lambda expression on Regex
+		lno = lno + 1
+	
+	ar = 30	# 30 deg angular resolution
+	
+	for ang in range(fname/ar):
+		# Rotate hxvl2 by ang
+		'''
+			(a,b) rotate by ang gives (a',b'), thus assign p with p' of (round(a'),round(b'))
+			Improve: take average of 7 cells around (a',b')
+		'''
+		ssg = 0	
+		for i in range(len(hxvl1)):
+			ssg = ssg + pow(hxvl1[i][2]-hxvl2[i][2],2)	# Decide on correlation score. Now, sum of square deviations
+		print "SSG for Rotation of "+str(ang)+" degrees = "+str(ssg)
+	
+'''	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ @$ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+
+#drawMap();
+#hexprob(20,0);
+ssgScore(90);
+
+'''	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ @$ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+
 def useless():
 	
 	ymax = int(math.ceil((ywin-3*r)/(math.sqrt(3)*r+gap)))
