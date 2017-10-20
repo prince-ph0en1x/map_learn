@@ -163,7 +163,7 @@ def ssgScore(fname):
 	lno = 0
 	for line in file:
 		hxvl1.append([])
-		hxvl1[lno].extend(list(map(float,re.findall('[0-9|\'.\']+', line))))	# Lambda expression on Regex
+		hxvl1[lno].extend(list(map(float,re.findall('-?[0-9|\'.\']+', line))))	# Lambda expression on Regex
 		lno = lno + 1
 	
 	hxvl2 = []
@@ -171,27 +171,82 @@ def ssgScore(fname):
 	lno = 0
 	for line in file:
 		hxvl2.append([])
-		hxvl2[lno].extend(list(map(float,re.findall('[0-9|\'.\']+', line))))	# Lambda expression on Regex
+		hxvl2[lno].extend(list(map(float,re.findall('-?[0-9|\'.\']+', line))))	# Lambda expression on Regex
 		lno = lno + 1
 	
-	ar = 30	# 30 deg angular resolution
+	ar = 10	# 30 deg angular resolution
 	
-	for ang in range(fname/ar):
+	#for i in range(len(hxvl1)):
+	#	print hxvl2[i]
+
+	for ang in range(360/ar+1):
 		# Rotate hxvl2 by ang
 		'''
 			(a,b) rotate by ang gives (a',b'), thus assign p with p' of (round(a'),round(b'))
 			Improve: take average of 7 cells around (a',b')
 		'''
-		ssg = 0	
+		
+		hxvl3 = [0 for x in range(0,len(hxvl1))]	
+		#if (ang == 0):
 		for i in range(len(hxvl1)):
-			ssg = ssg + pow(hxvl1[i][2]-hxvl2[i][2],2)	# Decide on correlation score. Now, sum of square deviations
-		print "SSG for Rotation of "+str(ang)+" degrees = "+str(ssg)
+			# Find rotated centre of hxvl2
+			# Find closest match to this pixel from elements in hxvl2
+			# Assign matching hex value as value of original centre in hxvl3
+			
+			(ria, rib) = hexrot(hxvl2[i][0],hxvl2[i][1],ang*ar*math.pi/180)
+			dmin = 100000
+			jmin = 0
+			for j in range(len(hxvl1)):
+				dij = hexdist(ria,rib,hxvl2[j][0],hxvl2[j][1])
+				if (dij < dmin):
+					dmin = dij
+					jmin = j
+			#print (i,jmin,dmin,hxvl2[i][0],hxvl2[i][1],hxvl2[jmin][0],hxvl2[jmin][1])
+			hxvl3[i] = hxvl2[jmin][2]
+				
+		# Find SSG score
+		ssg = 0
+		for i in range(len(hxvl1)):
+			ssg = ssg + pow(hxvl1[i][2]-hxvl3[i],2)	# Decide on correlation score. Now, sum of square deviations
+		print "SSG for Rotation of \t"+str(ang*ar)+" degrees \t= "+str(round(ssg,2))
+	 	
+def hexrot(a,b,ang):
+	hxd = 20
+	x = hxd * (a + b / 2)
+	y = hxd * math.sqrt(3) * b / 2
+	xc = sz/2
+	yc = sz/2
+
+	xxx = x - xc
+	yyy = y - yc
+			
+	xnew = + yyy * math.sin(ang) + xxx * math.cos(ang) + xc 
+	ynew = + yyy * math.cos(ang) - xxx * math.sin(ang) + yc
+			
+	bnew = 2 * (ynew / hxd) / math.sqrt(3)
+	anew = (xnew / hxd - bnew / 2)
 	
+	return (anew, bnew)
+
+
+def hexdist(a1,b1,a2,b2):
+	'''
+	dist{(a1,b1)--(a2,b2)}
+	sqrt((x2-x1)^2 + (y2-y1)^2)
+	x = a + b/2
+	y = sqrt(3)*b/2
+	'''
+	d =	pow(a1 + b1/2 - a2 - b2/2,2) + 3*pow(0.5*(b2-b1),2) 
+	return d
 '''	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ @$ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 '''
-
+'''
+ X	S R	 C
+AOC	 Q	XOZ
+ Z	P T	 A
+'''
 #drawMap();
 #hexprob(20,0);
 ssgScore(90);
