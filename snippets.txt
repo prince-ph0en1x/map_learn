@@ -1,0 +1,6 @@
+Space Complexity
+
+(a,b,p) for each Hex
+
+Time Complexity
+

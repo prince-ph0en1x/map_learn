@@ -174,7 +174,7 @@ def ssgScore(fname):
 		hxvl2[lno].extend(list(map(float,re.findall('-?[0-9|\'.\']+', line))))	# Lambda expression on Regex
 		lno = lno + 1
 	
-	ar = 10	# 30 deg angular resolution
+	ar = 1	# 30 deg angular resolution
 	
 	#for i in range(len(hxvl1)):
 	#	print hxvl2[i]
